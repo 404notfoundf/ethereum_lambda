@@ -31,24 +31,19 @@ def lambda_handler(event, context):
         raise ValueError('operation needs to be specified in request and needs to be eigher "status" or "send"')
 
     # {"operation": "status"}
-    if operation == 'status':
+    if operation == 'get_address':
         key_id = os.getenv('KMS_KEY_ID')
         pub_key = get_kms_public_key(key_id)
         eth_checksum_address = calc_eth_address(pub_key)
 
-        return {'eth_checksum_address': eth_checksum_address}
+        return {'address': eth_checksum_address}
 
-    # {"operation": "send",
-    #  "amount": 123,
-    #  "dst_address": "0x...",
-    #  "nonce": 0}
     elif operation == 'sign':
 
         if not (event.get('dst_address') and event.get('amount', -1) >= 0 and event.get('nonce', -1) >= 0):
-            return {'operation': 'sign',
-                    'error': 'missing parameter - sign requires amount, dst_address and nonce to be specified'}
+            return {'operation': 'sign', 'error': 'missing parameter - sign requires amount, dst_address and nonce to be specified'}
 
-        # get key_id from environment varaible
+        # get key_id from environment variable
         key_id = os.getenv('KMS_KEY_ID')
 
         # get destination address from send request
@@ -61,8 +56,18 @@ def lambda_handler(event, context):
 
         # optional params
         chainid = event.get('chainid')
+
         type = event.get('type')
+
+        data = event.get('data')
+
+        # add gas and data
+        gas = event.get('gas')
+
+        data = event.get('data')
+
         max_fee_per_gas = event.get('max_fee_per_gas')
+
         max_priority_fee_per_gas = event.get('max_priority_fee_per_gas')
 
         # download public key from KMS
@@ -71,12 +76,14 @@ def lambda_handler(event, context):
         # calculate the Ethereum public address from public key
         eth_checksum_addr = calc_eth_address(pub_key)
 
-        # collect rawd parameters for Ethereum transaction
+        # collect raw parameters for Ethereum transaction
         tx_params = get_tx_params(dst_address=dst_address,
                                   amount=amount,
                                   nonce=nonce,
                                   chainid=chainid,
                                   type=type,
+                                  gas=gas,
+                                  data=data,
                                   max_fee_per_gas=max_fee_per_gas,
                                   max_priority_fee_per_gas=max_priority_fee_per_gas)
 

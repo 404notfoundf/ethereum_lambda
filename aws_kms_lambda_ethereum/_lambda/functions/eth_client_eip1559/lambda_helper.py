@@ -27,7 +27,6 @@ SECP256_K1_N = int("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd036
 
 
 class EthKmsParams:
-
     def __init__(self, kms_key_id: str, eth_network: str):
         self._kms_key_id = kms_key_id
         self._eth_network = eth_network
@@ -151,13 +150,13 @@ def get_recovery_id(msg_hash: bytes, r: int, s: int, eth_checksum_addr: str, cha
 
 
 def get_tx_params(dst_address: str, amount: int, nonce: int,
-                  chainid: int, type: int, max_fee_per_gas: int, max_priority_fee_per_gas: int) -> dict:
+                  chainid: int, type: int, data: str, gas: int, max_fee_per_gas: int, max_priority_fee_per_gas: int) -> dict:
     transaction = {
         'nonce': nonce,
         'to': dst_address,
         'value': w3.toWei(amount, 'ether'),
-        'data': '0x00',
-        'gas': 160000,
+        'data': data,
+        'gas': gas,
         'maxFeePerGas': max_fee_per_gas,
         'maxPriorityFeePerGas': max_priority_fee_per_gas,
         'type': type,
