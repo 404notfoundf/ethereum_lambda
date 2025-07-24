@@ -28,15 +28,14 @@ def lambda_handler(event, context):
 
     operation = event.get('operation')
     if not operation:
-        raise ValueError('operation needs to be specified in request and needs to be eigher "status" or "send"')
+        raise ValueError('operation needs to be specified in request')
 
-    # {"operation": "status"}
     if operation == 'get_address':
         key_id = os.getenv('KMS_KEY_ID')
         pub_key = get_kms_public_key(key_id)
-        eth_checksum_address = calc_eth_address(pub_key)
+        eth_address = calc_eth_address(pub_key)
 
-        return {'address': eth_checksum_address}
+        return {'address': eth_address}
 
     elif operation == 'sign':
 

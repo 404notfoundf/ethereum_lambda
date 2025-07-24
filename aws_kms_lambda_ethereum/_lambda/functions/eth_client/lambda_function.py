@@ -30,18 +30,13 @@ def lambda_handler(event, context):
     if not operation:
         raise ValueError('operation needs to be specified in request and needs to be eigher "status" or "send"')
 
-    # {"operation": "status"}
-    if operation == 'status':
+    if operation == 'get_address':
         key_id = os.getenv('KMS_KEY_ID')
         pub_key = get_kms_public_key(key_id)
-        eth_checksum_address = calc_eth_address(pub_key)
+        eth_address = calc_eth_address(pub_key)
 
-        return {'eth_checksum_address': eth_checksum_address}
+        return {'address': eth_address}
 
-    # {"operation": "send",
-    #  "amount": 123,
-    #  "dst_address": "0x...",
-    #  "nonce": 0}
     elif operation == 'sign':
 
         if not (event.get('dst_address') and event.get('amount', -1) >= 0 and event.get('nonce', -1) >= 0):
@@ -60,6 +55,10 @@ def lambda_handler(event, context):
         # nonce from send request
         nonce = event.get('nonce')
 
+        data = event.get('data')
+
+        gas_price = event.get("gas_price")
+
         # download public key from KMS
         pub_key = get_kms_public_key(key_id)
 
@@ -69,7 +68,9 @@ def lambda_handler(event, context):
         # collect raw parameters for Ethereum transaction
         tx_params = get_tx_params(dst_eth_addr=dst_address,
                                   amount=amount,
-                                  nonce=nonce)
+                                  nonce=nonce,
+                                  data=data,
+                                  gas_price=gas_price)
 
         # assemble Ethereum transaction and sign it offline
         raw_tx_signed = assemble_tx(tx_params=tx_params,
