@@ -51,7 +51,6 @@ def get_params() -> EthKmsParams:
         eth_network=os.getenv('ETH_NETWORK')
     )
 
-
 def get_kms_public_key(key_id: str) -> bytes:
     client = boto3.client('kms')
 

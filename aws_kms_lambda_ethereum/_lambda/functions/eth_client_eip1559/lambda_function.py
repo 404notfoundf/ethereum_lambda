@@ -30,7 +30,7 @@ def lambda_handler(event, context):
     if not operation:
         raise ValueError('operation needs to be specified in request')
 
-    if operation == 'get_address':
+    if operation == 'address':
         key_id = os.getenv('KMS_KEY_ID')
         pub_key = get_kms_public_key(key_id)
         eth_address = calc_eth_address(pub_key)
@@ -38,7 +38,6 @@ def lambda_handler(event, context):
         return {'address': eth_address}
 
     elif operation == 'sign':
-
         if not (event.get('dst_address') and event.get('amount', -1) >= 0 and event.get('nonce', -1) >= 0):
             return {'operation': 'sign', 'error': 'missing parameter - sign requires amount, dst_address and nonce to be specified'}
 
@@ -54,11 +53,9 @@ def lambda_handler(event, context):
         nonce = event.get('nonce')
 
         # optional params
-        chainid = event.get('chainid')
+        chainId = event.get('chainid')
 
         type = event.get('type')
-
-        data = event.get('data')
 
         # add gas and data
         gas = event.get('gas')
@@ -79,7 +76,7 @@ def lambda_handler(event, context):
         tx_params = get_tx_params(dst_address=dst_address,
                                   amount=amount,
                                   nonce=nonce,
-                                  chainid=chainid,
+                                  chainId=chainId,
                                   type=type,
                                   gas=gas,
                                   data=data,
@@ -90,7 +87,7 @@ def lambda_handler(event, context):
         raw_tx_signed_hash, raw_tx_signed_payload = assemble_tx(tx_params=tx_params,
                                                                 params=params,
                                                                 eth_checksum_addr=eth_checksum_addr,
-                                                                chainid=chainid)
+                                                                chainId=chainId)
 
         return {"signed_tx_hash": raw_tx_signed_hash,
                 "signed_tx_payload": raw_tx_signed_payload}

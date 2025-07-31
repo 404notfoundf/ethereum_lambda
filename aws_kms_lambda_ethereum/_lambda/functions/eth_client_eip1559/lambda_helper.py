@@ -133,11 +133,11 @@ def find_eth_signature(params: EthKmsParams, plaintext: bytes) -> dict:
     return {'r': r, 's': s}
 
 
-def get_recovery_id(msg_hash: bytes, r: int, s: int, eth_checksum_addr: str, chainid: int) -> dict:
+def get_recovery_id(msg_hash: bytes, r: int, s: int, eth_checksum_addr: str, chainId: int) -> dict:
     # https://eips.ethereum.org/EIPS/eip-155
-    # calculate v according to EIP155 based on chainid parameter
+    # calculate v according to EIP155 based on chainId parameter
     # {0,1} + CHAIN_ID * 2 + 35
-    v_lower = chainid * 2 + 35
+    v_lower = chainId * 2 + 35
     v_range = [v_lower, v_lower + 1]
 
     for v in v_range:
@@ -150,10 +150,10 @@ def get_recovery_id(msg_hash: bytes, r: int, s: int, eth_checksum_addr: str, cha
 
 
 def get_tx_params(dst_address: str, amount: int, nonce: int,
-                  chainid: int, type: int, data: str, gas: int, max_fee_per_gas: int, max_priority_fee_per_gas: int) -> dict:
+                  chainId: int, type: int, data: str, gas: int, max_fee_per_gas: int, max_priority_fee_per_gas: int) -> dict:
 
     transaction = {
-        'chainId': chainid,
+        'chainId': chainId,
         'nonce': nonce,
         'to': dst_address,
         'value': w3.toWei(amount, 'ether'),
@@ -167,7 +167,7 @@ def get_tx_params(dst_address: str, amount: int, nonce: int,
     return transaction
 
 
-def assemble_tx(tx_params: dict, params: EthKmsParams, eth_checksum_addr: str, chainid: int) -> (bytes, bytes):
+def assemble_tx(tx_params: dict, params: EthKmsParams, eth_checksum_addr: str, chainId: int) -> (bytes, bytes):
     tx_unsigned = serializable_unsigned_transaction_from_dict(transaction_dict=tx_params)
     tx_hash = tx_unsigned.hash()
 
@@ -178,7 +178,7 @@ def assemble_tx(tx_params: dict, params: EthKmsParams, eth_checksum_addr: str, c
                                                 r=tx_sig['r'],
                                                 s=tx_sig['s'],
                                                 eth_checksum_addr=eth_checksum_addr,
-                                                chainid=chainid)
+                                                chainId=chainId)
 
     tx_encoded = encode_transaction(unsigned_transaction=tx_unsigned,
                                     vrs=(tx_eth_recovered_pub_addr['y_parity'], tx_sig['r'], tx_sig['s']))
